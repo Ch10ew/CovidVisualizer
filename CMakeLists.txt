@@ -71,7 +71,7 @@ ExternalProject_Add(imgui-sfml
     PREFIX "${CMAKE_BINARY_DIR}/lib"
     GIT_REPOSITORY "https://github.com/eliasdaler/imgui-sfml.git"
     GIT_TAG "master"
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/lib/imgui-sfml -DIMGUI_DIR=${CMAKE_BINARY_DIR}/lib/src/imgui -DSFML_DIR=${CMAKE_BINARY_DIR}/lib/src/sfml-build -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/lib/imgui-sfml -DIMGUI_DIR=${CMAKE_BINARY_DIR}/lib/imgui -DSFML_DIR=${CMAKE_BINARY_DIR}/lib/src/sfml-build -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
 )
 
 # Prevent build for ImGUI-SFML on all targets build
@@ -137,6 +137,8 @@ endif()
 # Make sure third-party libraries are built before executable
 add_dependencies(CovidVisualizer sfml)
 set_target_properties(CovidVisualizer PROPERTIES EXCLUDE_FROM_ALL TRUE)
+add_dependencies(imgui-sfml sfml)
+add_dependencies(imgui-sfml imgui)
 add_dependencies(CovidVisualizer imgui-sfml)
 set_target_properties(CovidVisualizer PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
