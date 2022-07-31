@@ -37,9 +37,3 @@
 # CMake generated folders
 [Bb]uild/
 [Ii]nstall/
-
-# External libraries
-[Vv]endor/*
-
-# Exepmt ignores
-![Vv]endor/setup-win64.py
