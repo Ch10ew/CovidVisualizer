@@ -93,11 +93,11 @@ include_directories(${CMAKE_BINARY_DIR}/lib/csv/${CMAKE_INSTALL_INCLUDEDIR})
 link_directories(${CMAKE_BINARY_DIR}/lib/imgui-sfml/${CMAKE_INSTALL_LIBDIR})
 include_directories(${CMAKE_BINARY_DIR}/lib/imgui-sfml/${CMAKE_INSTALL_INCLUDEDIR})
 
-# This is required for fast-cpp-csv-parser
-find_package(Threads REQUIRED)
-
 # This is required for SFML
 find_package(OpenGL REQUIRED)
+
+# This is required for fast-cpp-csv-parser
+find_package(Threads REQUIRED)
 
 
 
