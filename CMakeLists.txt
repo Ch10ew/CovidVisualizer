@@ -4,9 +4,14 @@ project(CovidVisualizer VERSION 1.0.0)
 # Use C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_compile_options(-v)
+add_link_options(-v)
 
-# Option for static linking
-set(SFML_STATIC_LIBRARIES FALSE CACHE BOOL "TRUE to statically link SFML, FALSE to dynamically link SFML." FORCE)
+# Options
+set(SFML_STATIC_LIBRARIES FALSE CACHE BOOL "TRUE to statically link SFML, FALSE to dynamically link SFML.")
+set(SWI_PROLOG_LIBRARY CACHE PATH "Path to lib directory of SWI-Prolog.")
+set(SWI_PROLOG_INCLUDE_DIR CACHE PATH "Path to include directory of SWI-Prolog.")
+set(SWI_PROLOG_BIN_DIR CACHE PATH "Path to bin directory of SWI-Prolog.")
 
 
 
@@ -93,6 +98,10 @@ include_directories(${CMAKE_BINARY_DIR}/lib/csv/${CMAKE_INSTALL_INCLUDEDIR})
 link_directories(${CMAKE_BINARY_DIR}/lib/imgui-sfml/${CMAKE_INSTALL_LIBDIR})
 include_directories(${CMAKE_BINARY_DIR}/lib/imgui-sfml/${CMAKE_INSTALL_INCLUDEDIR})
 
+# Set up SWI-Prolog library
+link_directories(${SWI_PROLOG_LIBRARY} ${SWI_PROLOG_BIN_DIR})
+include_directories(${SWI_PROLOG_INCLUDE_DIR})
+
 # This is required for SFML
 find_package(OpenGL REQUIRED)
 
@@ -114,6 +123,9 @@ target_include_directories(imgui SYSTEM INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/li
 # Create main target
 file(GLOB_RECURSE sources src/*.cpp)
 add_executable(CovidVisualizer ${sources})
+target_compile_definitions(CovidVisualizer PUBLIC _REENTRANT
+                                                  __SWI_PROLOG__
+                                                  __SWI_EMBEDDED__)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(${SFML_STATIC_LIBRARIES})
@@ -124,6 +136,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         target_link_options(CovidVisualizer PRIVATE -mwindows)
+        target_compile_definitions(CovidVisualizer PUBLIC __WINDOWS__
+                                                          _WINDOWS)
     endif()
     if(${SFML_STATIC_LIBRARIES})
         target_link_libraries(CovidVisualizer imgui csv sfml-audio-s sfml-graphics-s sfml-window-s sfml-network-s sfml-system-s opengl32 winmm gdi32 opengl32 freetype openal32 flac vorbisenc vorbisfile vorbis ogg ws2_32 Threads::Threads libImGui-SFML)
@@ -131,6 +145,9 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
         target_link_libraries(CovidVisualizer imgui csv sfml-audio sfml-graphics sfml-window sfml-network sfml-system Threads::Threads libImGui-SFML)
     endif()
 endif()
+
+# SWI-Prolog linker settings
+target_link_libraries(CovidVisualizer swipl)
 
 
 

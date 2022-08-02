@@ -8,13 +8,18 @@
 
 #include <csv.h>
 
+#include <SWI-Prolog.h>
+#include <SWI-Stream.h>
+
 #include <iostream>
 
-int main()
+int main(int argc, char** argv)
 {
     const int WINDOW_WIDTH = 640;
     const int WINDOW_HEIGHT = 480;
     std::cout << "Hello World!" << std::endl;
+
+    PL_initialise(argc, argv);
 
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "ImGui + SFML = <3", sf::Style::Titlebar | sf::Style::Close);
     window.setFramerateLimit(60);
