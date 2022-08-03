@@ -56,14 +56,14 @@ add_library(imgui INTERFACE)
 # Get csv library from GitHub
 include(ExternalProject)
 ExternalProject_Add(csv-external
-        URL https://raw.githubusercontent.com/ben-strasser/fast-cpp-csv-parser/master/csv.h
+        URL https://raw.githubusercontent.com/vincentlaucsb/csv-parser/master/single_include/csv.hpp
         SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/lib/csv"
         DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/lib/csv"
         BUILD_COMMAND ""
         INSTALL_COMMAND ""
         CONFIGURE_COMMAND ""
         DOWNLOAD_NO_EXTRACT TRUE
-        DOWNLOAD_NAME "csv.h"
+        DOWNLOAD_NAME "csv.hpp"
 )
 
 add_library(csv INTERFACE)
@@ -121,7 +121,7 @@ target_include_directories(imgui SYSTEM INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/li
 
 
 # Create main target
-file(GLOB_RECURSE sources src/*.cpp)
+file(GLOB_RECURSE sources src/*)
 add_executable(CovidVisualizer ${sources})
 target_compile_definitions(CovidVisualizer PUBLIC _REENTRANT
                                                   __SWI_PROLOG__
@@ -148,6 +148,12 @@ endif()
 
 # SWI-Prolog linker settings
 target_link_libraries(CovidVisualizer swipl)
+
+
+
+# Copy over resources folder
+file(GLOB_RECURSE data resources/*)
+file(COPY ${data} DESTINATION resources)
 
 
 

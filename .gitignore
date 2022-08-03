@@ -37,3 +37,6 @@
 # CMake generated folders
 [Bb]uild/
 [Ii]nstall/
+
+# ImGui config files
+**/imgui.ini
