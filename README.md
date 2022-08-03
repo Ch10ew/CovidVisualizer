@@ -31,7 +31,7 @@ SWI-Prolog is not automatically pulled and built using CMake because the swipl-d
 * [SWI-Prolog 8.4.3-1](https://www.swi-prolog.org/download/stable)
 
 ## Prerequisites
-Download and install CMake, a C++ Compiler, and SWI-Prolog.
+Download and install CMake, a C++17 Compiler, and SWI-Prolog.
 
 ## CMake
 The following options are available to be set:
@@ -59,4 +59,4 @@ make
 * [fast-cpp-csv-parser](https://github.com/ben-strasser/fast-cpp-csv-parser) is under the [BSD-3-Clause license](https://opensource.org/licenses/BSD-3-Clause)
 * [Dear ImGui](https://github.com/ocornut/imgui) is under the [MIT license](https://opensource.org/licenses/MIT)
 * [ImGui-SFML](https://github.com/eliasdaler/imgui-sfml) is under the [MIT license](https://opensource.org/licenses/MIT)
-* [SWI-Prolog] is under the [BSD-2-Clause license](https://opensource.org/licenses/BSD-2-Clause)
+* [SWI-Prolog](https://github.com/SWI-Prolog/swipl-devel) is under the [BSD-2-Clause license](https://opensource.org/licenses/BSD-2-Clause)
