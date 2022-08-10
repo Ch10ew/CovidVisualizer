@@ -1,5 +1,5 @@
-#ifndef TABLE_H
-#define TABLE_H
+#ifndef TABLE_HPP
+#define TABLE_HPP
 
 #include <string>
 
@@ -22,18 +22,32 @@ namespace co
     void TableTotalConfirmed();
 
     /**
-     * @brief Compute the sum of confirmed cases by week and month for each country.
+     * @brief Compute the sum of confirmed cases by week for the provided country.
      *
      * Called by co::Update().
      */
-    void TableSumOfConfirmed();
+    void TableSumOfConfirmedWeek(std::string country);
 
     /**
-     * @brief Find the highest/lowest death and recovered Covid-19 cases as per country.
+     * @brief Compute the sum of confirmed cases by month for the provided country.
      *
      * Called by co::Update().
      */
-    void TableHighestLowestDeathRecovered();
+    void TableSumOfConfirmedMonth(std::string country);
+
+    /**
+     * @brief Find the highest/lowest death Covid-19 cases as per country.
+     *
+     * Called by co::Update().
+     */
+    void TableHighestLowestDeath();
+
+    /**
+     * @brief Find the highest/lowest recovered Covid-19 cases as per country.
+     *
+     * Called by co::Update().
+     */
+    void TableHighestLowestRecovered();
 
     /**
      * @brief Search/locate the country for Covid-19 cases covering confirmed, death and recovered cases.
@@ -42,7 +56,7 @@ namespace co
      *
      * @param searchTerm Filter
      */
-    void TableSearchCountry(std::string searchTerm);
+    void TableSearchCountry(std::string country);
 } // namespace co
 
-#endif // TABLE_H
+#endif // TABLE_HPP

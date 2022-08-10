@@ -6,9 +6,11 @@ namespace co
     enum ButtonOptions : char
     {
         TOTAL_CONFIRMED = 1,
-        SUM_OF_CONFIRMED = 2,
-        HIGHEST_LOWEST_DEATH_RECOVERED = 4,
-        SEARCH_COUNTRY = 8,
+        SUM_OF_CONFIRMED_WEEK = 2,
+        SUM_OF_CONFIRMED_MONTH = 4,
+        HIGHEST_LOWEST_DEATH = 8,
+        HIGHEST_LOWEST_RECOVERED = 16,
+        SEARCH_COUNTRY = 32,
     };
 
     inline ButtonOptions operator|(ButtonOptions a, ButtonOptions b)

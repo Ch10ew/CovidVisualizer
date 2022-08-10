@@ -1,5 +1,7 @@
 #include "Window.hpp"
+
 #include "../ButtonOptions/ButtonOptions.hpp"
+#include "../Dataset/Dataset.hpp"
 #include "../Table/Table.hpp"
 
 #include <SFML/Graphics.hpp>
@@ -7,6 +9,7 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 
+#include <cstring>
 #include <stdexcept>
 #include <string>
 
@@ -48,7 +51,7 @@ void co::Update(sf::RenderWindow& window, sf::Clock& deltaClock)
 {
     const int WINDOW_WIDTH = window.getSize().x;
     const int WINDOW_HEIGHT = window.getSize().y;
-    static const ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysVerticalScrollbar;
+    static const ImGuiWindowFlags WINDOW_FLAGS = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav;
 
     ImGui::SFML::Update(window, deltaClock.restart()); // Update step for ImGui
 
@@ -63,18 +66,31 @@ void co::Update(sf::RenderWindow& window, sf::Clock& deltaClock)
 #pragma region Options
 
     static ButtonOptions sButtonOptions;
-    static std::string rawCountryName = "";
+    static int listboxCurrentSelection = 0;
     ButtonOptions buttonOptions = static_cast<ButtonOptions>(0);
 
     // Stack the flags for this iteration
     buttonOptions = buttonOptions | static_cast<ButtonOptions>(TOTAL_CONFIRMED * ImGui::Button("Display Total Confirmed Covid-19 Cases According to Country"));
-    buttonOptions = buttonOptions | static_cast<ButtonOptions>(SUM_OF_CONFIRMED * ImGui::Button("Compute the Sum of Confirmed Cases by Week and Month for Each Country"));
-    buttonOptions = buttonOptions | static_cast<ButtonOptions>(HIGHEST_LOWEST_DEATH_RECOVERED * ImGui::Button("Find the Highest/Lowest Death and Recovered Covid-19 Cases as Per Country"));
+    buttonOptions = buttonOptions | static_cast<ButtonOptions>(SUM_OF_CONFIRMED_WEEK * ImGui::Button("Compute the Sum of Confirmed Cases by Week for Country"));
+    ImGui::SameLine();
+    ImGui::Text("(Uses Country Dropdown)");
+    buttonOptions = buttonOptions | static_cast<ButtonOptions>(SUM_OF_CONFIRMED_MONTH * ImGui::Button("Compute the Sum of Confirmed Cases by Month for Country"));
+    ImGui::SameLine();
+    ImGui::Text("(Uses Country Dropdown)");
+    buttonOptions = buttonOptions | static_cast<ButtonOptions>(HIGHEST_LOWEST_DEATH * ImGui::Button("Find the Highest/Lowest Death Covid-19 Cases as Per Country"));
+    buttonOptions = buttonOptions | static_cast<ButtonOptions>(HIGHEST_LOWEST_RECOVERED * ImGui::Button("Find the Highest/Lowest Recovered Covid-19 Cases as Per Country"));
     buttonOptions = buttonOptions | static_cast<ButtonOptions>(SEARCH_COUNTRY * ImGui::Button("Search/Locate the Country for Covid-19 Cases"));
     ImGui::SameLine();
-    ImGui::Text("Country: ");
-    ImGui::SameLine();
-    ImGui::InputText("Country Search Field", &rawCountryName);
+    ImGui::Text("(Uses Country Dropdown)");
+
+    std::vector<std::string> countryNamesStrVector = GetCountryNames();
+    std::vector<const char*> countryNamesCharVector;
+    for (int i = 0; i < countryNamesStrVector.size(); ++i)
+    {
+        countryNamesCharVector.push_back(countryNamesStrVector[i].c_str());
+    }
+
+    ImGui::ListBox("Country\n(single select)", &listboxCurrentSelection, countryNamesCharVector.data(), countryNamesCharVector.size());
     if (ImGui::Button("Reset"))
     {
         sButtonOptions = static_cast<ButtonOptions>(0);
@@ -100,14 +116,20 @@ void co::Update(sf::RenderWindow& window, sf::Clock& deltaClock)
     case TOTAL_CONFIRMED:
         TableTotalConfirmed();
         break;
-    case SUM_OF_CONFIRMED:
-        TableSumOfConfirmed();
+    case SUM_OF_CONFIRMED_WEEK:
+        TableSumOfConfirmedWeek(countryNamesStrVector[listboxCurrentSelection]);
         break;
-    case HIGHEST_LOWEST_DEATH_RECOVERED:
-        TableHighestLowestDeathRecovered();
+    case SUM_OF_CONFIRMED_MONTH:
+        TableSumOfConfirmedMonth(countryNamesStrVector[listboxCurrentSelection]);
+        break;
+    case HIGHEST_LOWEST_DEATH:
+        TableHighestLowestDeath();
+        break;
+    case HIGHEST_LOWEST_RECOVERED:
+        TableHighestLowestRecovered();
         break;
     case SEARCH_COUNTRY:
-        TableSearchCountry(rawCountryName);
+        TableSearchCountry(countryNamesStrVector[listboxCurrentSelection]);
         break;
     default:
         TableDefault();

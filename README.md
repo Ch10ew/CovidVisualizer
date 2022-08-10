@@ -7,6 +7,7 @@ The following dependencies will be automatically pulled from github using CMake
 * [Vince's CSV Parser](https://github.com/vincentlaucsb/csv-parser)
 * [Dear ImGui](https://github.com/ocornut/imgui)
 * [ImGui-SFML](https://github.com/eliasdaler/imgui-sfml)
+* [date](https://github.com/HowardHinnant/date)
 
 The following dependencies must be **manually installed**
 * [SWI-Prolog 8.4.3-1](https://www.swi-prolog.org/download/stable)
@@ -18,6 +19,7 @@ This repository is tested with the following set:
 * Vince's CSV Parser - branch master, commit 9d5f796a32c6cdecd83a2f778ca6db0500948d27
 * Dear ImGui - branch master, commit e99c4fc6688e218a0e5da50f56638aebab45da9b
 * ImGui-SFML - branch master, commit a80d9547832c57a149cda452ed9456def5bb6328
+* date - branch master, commit e6f4aed4d11d4e50687e9aa8630c7f0db7d31dba
 * SWI-Prolog 8.4.3-1 for Microsoft Windows (64 bit)
 
 ## Note on SWI-Prolog
@@ -59,4 +61,5 @@ make
 * [Vince's CSV Parser](https://github.com/vincentlaucsb/csv-parser) is under the [MIT license](https://opensource.org/licenses/MIT)
 * [Dear ImGui](https://github.com/ocornut/imgui) is under the [MIT license](https://opensource.org/licenses/MIT)
 * [ImGui-SFML](https://github.com/eliasdaler/imgui-sfml) is under the [MIT license](https://opensource.org/licenses/MIT)
+* [date](https://github.com/HowardHinnant/date) is under the [MIT license](https://opensource.org/licenses/MIT)
 * [SWI-Prolog](https://github.com/SWI-Prolog/swipl-devel) is under the [BSD-2-Clause license](https://opensource.org/licenses/BSD-2-Clause)

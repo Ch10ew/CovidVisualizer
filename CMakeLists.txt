@@ -70,6 +70,23 @@ add_library(csv INTERFACE)
 
 
 
+# Get date library from GitHub
+include(ExternalProject)
+ExternalProject_Add(date-external
+    PREFIX "${CMAKE_BINARY_DIR}/lib"
+    GIT_REPOSITORY "https://github.com/HowardHinnant/date.git"
+    GIT_TAG "master"
+    SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/lib/date"
+    DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/lib/date"
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    CONFIGURE_COMMAND ""
+)
+
+add_library(date INTERFACE)
+
+
+
 # Get ImGui-SFML library from GitHub
 include(ExternalProject)
 ExternalProject_Add(imgui-sfml
@@ -94,7 +111,7 @@ link_directories(${CMAKE_BINARY_DIR}/lib/sfml/${CMAKE_INSTALL_LIBDIR})
 include_directories(${CMAKE_BINARY_DIR}/lib/sfml/${CMAKE_INSTALL_INCLUDEDIR})
 link_directories(${CMAKE_BINARY_DIR}/lib/imgui/${CMAKE_INSTALL_LIBDIR})
 include_directories(${CMAKE_BINARY_DIR}/lib/imgui/${CMAKE_INSTALL_INCLUDEDIR})
-include_directories(${CMAKE_BINARY_DIR}/lib/csv/${CMAKE_INSTALL_INCLUDEDIR})
+include_directories(${CMAKE_BINARY_DIR}/lib/date/${CMAKE_INSTALL_INCLUDEDIR})
 link_directories(${CMAKE_BINARY_DIR}/lib/imgui-sfml/${CMAKE_INSTALL_LIBDIR})
 include_directories(${CMAKE_BINARY_DIR}/lib/imgui-sfml/${CMAKE_INSTALL_INCLUDEDIR})
 
@@ -118,6 +135,10 @@ target_include_directories(csv SYSTEM INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/lib/
 add_dependencies(imgui imgui-external)
 target_include_directories(imgui SYSTEM INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/lib/imgui)
 
+# Set up ImGUI library
+add_dependencies(date date-external)
+target_include_directories(date SYSTEM INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/lib/date)
+
 
 
 # Create main target
@@ -129,9 +150,9 @@ target_compile_definitions(CovidVisualizer PUBLIC _REENTRANT
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(${SFML_STATIC_LIBRARIES})
-        target_link_libraries(CovidVisualizer imgui csv sfml-audio-s-d sfml-graphics-s-d sfml-window-s-d sfml-network-s-d sfml-system-s-d opengl32 winmm gdi32 opengl32 freetype openal32 flac vorbisenc vorbisfile vorbis ogg ws2_32 Threads::Threads libImGui-SFML_d)
+        target_link_libraries(CovidVisualizer date imgui csv sfml-audio-s-d sfml-graphics-s-d sfml-window-s-d sfml-network-s-d sfml-system-s-d opengl32 winmm gdi32 opengl32 freetype openal32 flac vorbisenc vorbisfile vorbis ogg ws2_32 Threads::Threads libImGui-SFML_d)
     else()
-        target_link_libraries(CovidVisualizer imgui csv sfml-audio-d sfml-graphics-d sfml-window-d sfml-network-d sfml-system-d Threads::Threads libImGui-SFML_d)
+        target_link_libraries(CovidVisualizer date imgui csv sfml-audio-d sfml-graphics-d sfml-window-d sfml-network-d sfml-system-d Threads::Threads libImGui-SFML_d)
     endif()
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -140,9 +161,9 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
                                                           _WINDOWS)
     endif()
     if(${SFML_STATIC_LIBRARIES})
-        target_link_libraries(CovidVisualizer imgui csv sfml-audio-s sfml-graphics-s sfml-window-s sfml-network-s sfml-system-s opengl32 winmm gdi32 opengl32 freetype openal32 flac vorbisenc vorbisfile vorbis ogg ws2_32 Threads::Threads libImGui-SFML)
+        target_link_libraries(CovidVisualizer date imgui csv sfml-audio-s sfml-graphics-s sfml-window-s sfml-network-s sfml-system-s opengl32 winmm gdi32 opengl32 freetype openal32 flac vorbisenc vorbisfile vorbis ogg ws2_32 Threads::Threads libImGui-SFML)
     else()
-        target_link_libraries(CovidVisualizer imgui csv sfml-audio sfml-graphics sfml-window sfml-network sfml-system Threads::Threads libImGui-SFML)
+        target_link_libraries(CovidVisualizer date imgui csv sfml-audio sfml-graphics sfml-window sfml-network sfml-system Threads::Threads libImGui-SFML)
     endif()
 endif()
 

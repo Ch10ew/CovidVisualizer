@@ -1,5 +1,5 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef WINDOW_HPP
+#define WINDOW_HPP
 
 #include <SFML/Graphics.hpp>
 
@@ -55,4 +55,4 @@ namespace co
     void TableDefault();
 } // namespace co
 
-#endif // WINDOW_H
+#endif // WINDOW_HPP
