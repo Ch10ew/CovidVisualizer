@@ -1,6 +1,9 @@
 # CovidVisualizer
 Functional programming implementation of a COVID-19 dataset visualizer with Prolog utilization for APLC assignment.
 
+# Note
+Release build is broken due to SWI-Prolog being broken. Please only use the Debug build.
+
 # Dependencies
 The following dependencies will be automatically pulled from github using CMake
 * [SFML](https://www.sfml-dev.org/download/sfml/2.5.1/)

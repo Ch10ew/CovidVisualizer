@@ -154,7 +154,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     else()
         target_link_libraries(CovidVisualizer date imgui csv sfml-audio-d sfml-graphics-d sfml-window-d sfml-network-d sfml-system-d Threads::Threads libImGui-SFML_d)
     endif()
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         target_link_options(CovidVisualizer PRIVATE -mwindows)
         target_compile_definitions(CovidVisualizer PUBLIC __WINDOWS__
