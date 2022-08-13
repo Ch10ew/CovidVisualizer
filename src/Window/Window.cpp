@@ -82,6 +82,7 @@ void co::Update(sf::RenderWindow& window, sf::Clock& deltaClock)
     buttonOptions = buttonOptions | static_cast<ButtonOptions>(SEARCH_COUNTRY * ImGui::Button("Search/Locate the Country for Covid-19 Cases"));
     ImGui::SameLine();
     ImGui::Text("(Uses Country Dropdown)");
+    buttonOptions = buttonOptions | static_cast<ButtonOptions>(SORT_COUNTRY * ImGui::Button("Sort by Ascending Order of Confirmed Cases"));
 
     std::vector<std::string> countryNamesStrVector = GetCountryNames();
     std::vector<const char*> countryNamesCharVector;
@@ -130,6 +131,9 @@ void co::Update(sf::RenderWindow& window, sf::Clock& deltaClock)
         break;
     case SEARCH_COUNTRY:
         TableSearchCountry(countryNamesStrVector[listboxCurrentSelection]);
+        break;
+    case SORT_COUNTRY:
+        TableSortCountry();
         break;
     default:
         TableDefault();

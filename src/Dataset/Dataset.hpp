@@ -2,13 +2,23 @@
 #define DATASET_HPP
 
 #include <csv.hpp>
+#include <date/date.h>
 
+#include <fstream>
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
 
 namespace co
 {
+    /**
+     * @brief Writes prolog facts of cases in `filename`.
+     *
+     * @param filename File to write to.
+     */
+    void BuildPrologFacts(const std::string& filename);
+
     /**
      * @brief Get unique country names in dataset.
      *
@@ -19,9 +29,9 @@ namespace co
     /**
      * @brief Get total confirmed Covid-19 cases according to country.
      *
-     * @return std::vector<std::string> Map of Country - Total Confirmed Cases
+     * @return std::map<std::string, long> Map of Country - Total Confirmed Cases
      */
-    std::map<std::string, long> CalculateTotal();
+    std::map<std::string, long> CalculateTotalConfirmed();
 
     /**
      * @brief Compute the sum of confirmed cases by week for each country.
@@ -46,18 +56,34 @@ namespace co
      *
      * Headers are as follows: Country, Lowest Death, Highest Death, Lowest Recovered, Highest Recovered
      *
-     * @return std::vector<std::vector<std::string>> Data
+     * @return std::map<std::string, std::pair<long, long>> Data
      */
-    std::map<std::string, std::pair<long long, long long>> CalculateHighestLowestDeath();
+    std::map<std::string, std::pair<long, long>> CalculateHighestLowestDeath();
 
     /**
      * @brief Find the highest & lowest recovered count for each country.
      *
      * Headers are as follows: Country, Lowest Recovered, Highest Recovered
      *
-     * @return std::vector<std::vector<std::string>> Data
+     * @return std::map<std::string, std::pair<long, long>> Data
      */
-    std::map<std::string, std::pair<long long, long long>> CalculateHighestLowestRecovered();
+    std::map<std::string, std::pair<long, long>> CalculateHighestLowestRecovered();
+
+    /**
+     * @brief Find the total confirmed, death, recovered count for each country.
+     *
+     * Headers for data are as follows: Confirmed, Deaths, Recovered
+     *
+     * @return std::map<std::string, std::vector<long>> Map of Country - Data
+     */
+    std::map<std::string, std::vector<long>> CalculateConfirmedDeathRecovered();
+
+    /**
+     * @brief Uses Prolog to sort the countries by cases, which Prolog will return a string in the sorted order.
+     *
+     * @return std::vector<std::pair<std::string, long>> Sorted List of Countries by Confirmed Cases
+     */
+    std::vector<std::pair<std::string, long>> ProcessPrologResult();
 
     /**
      * @brief [INTERNAL] Build Date Ranges.
@@ -70,8 +96,7 @@ namespace co
      * @param endDateRangeCondition condition to end a date range
      * @return std::vector<std::string>
      */
-    template <class T>
-    std::vector<std::string> BuildDateRanges(const std::vector<std::string>& colNames, T startDateRangeCondition, T endDateRangeCondition);
+    std::vector<std::string> BuildDateRanges(const std::vector<std::string>& colNames, std::function<bool(date::year_month_day)> startDateRangeCondition, std::function<bool(date::year_month_day)> endDateRangeCondition);
 
     /**
      * @brief [INTERNAL] Summation of confirmed cases count into lists based on ranges based on headers
@@ -81,6 +106,13 @@ namespace co
      * @param data reference to initialized data
      */
     void CalculateCasesCount(csv::CSVReader& csvReader, std::vector<std::string>& dateRanges, std::vector<std::vector<std::string>>& data);
+
+    /**
+     * @brief [INTERNAL] Get
+     *
+     * @return std::map<std::string, long> Map of Country - Total X Cases
+     */
+    std::map<std::string, long> CalculateTotal(const std::string& filename);
 } // namespace co
 
 #endif // DATASET_HPP

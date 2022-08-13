@@ -11,6 +11,7 @@ namespace co
         HIGHEST_LOWEST_DEATH = 8,
         HIGHEST_LOWEST_RECOVERED = 16,
         SEARCH_COUNTRY = 32,
+        SORT_COUNTRY = 64,
     };
 
     inline ButtonOptions operator|(ButtonOptions a, ButtonOptions b)

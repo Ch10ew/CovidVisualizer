@@ -1,5 +1,6 @@
 #include "Dataset.hpp"
 
+#include "../Prolog/Prolog.hpp"
 #include "../Structures/List.hpp"
 #include "../Util/DateUtils.hpp"
 #include "../Util/StringUtils.hpp"
@@ -8,9 +9,30 @@
 #include <date/date.h>
 
 #include <execution>
+#include <fstream>
+#include <functional>
 #include <numeric>
 #include <string>
 #include <vector>
+
+void co::BuildPrologFacts(const std::string& filename)
+{
+    // WHAT TO DO IN HERE
+    // Write the numbers into data.pl
+    std::ofstream datapl(filename);
+
+    std::map<std::string, long> mapConfirmed = co::CalculateTotalConfirmed();
+    std::for_each(
+        mapConfirmed.begin(),
+        mapConfirmed.end(),
+        [&](const auto& kv)
+        {
+            std::string keyCopy = kv.first;
+            // co::replace_all(keyCopy, ",", "");
+            co::replace_all(keyCopy, "'", "\\'");
+            datapl << "cases('" << keyCopy << "', " << kv.second << ").\n";
+        });
+}
 
 std::vector<std::string> co::GetCountryNames()
 {
@@ -36,21 +58,13 @@ std::vector<std::string> co::GetCountryNames()
     return data;
 }
 
-std::map<std::string, long> co::CalculateTotal()
+std::map<std::string, long> co::CalculateTotalConfirmed()
 {
     static std::map<std::string, long> data;
 
     if (data.empty())
     {
-        csv::CSVReader csvReader("resources/time_series_covid19_confirmed_global.csv");
-
-        // do processing
-        csv::CSVRow row;
-
-        while (csvReader.read_row(row))
-        {
-            data[row[1].get()] += row[row.size() - 1].template get<long>();
-        }
+        data = CalculateTotal("resources/time_series_covid19_confirmed_global.csv");
     }
 
     return data;
@@ -108,9 +122,9 @@ std::vector<std::vector<std::string>> co::CalculateTotalByMonth()
     return data;
 }
 
-std::map<std::string, std::pair<long long, long long>> co::CalculateHighestLowestDeath()
+std::map<std::string, std::pair<long, long>> co::CalculateHighestLowestDeath()
 {
-    static std::map<std::string, std::pair<long long, long long>> data;
+    static std::map<std::string, std::pair<long, long>> data;
 
     if (data.empty())
     {
@@ -121,7 +135,7 @@ std::map<std::string, std::pair<long long, long long>> co::CalculateHighestLowes
 
         while (csvReader.read_row(row))
         {
-            std::vector<long long> rawRowData;
+            std::vector<long> rawRowData;
             rawRowData.resize(row.size() - 4);
             std::transform(
                 row.begin() + 4,
@@ -129,7 +143,7 @@ std::map<std::string, std::pair<long long, long long>> co::CalculateHighestLowes
                 rawRowData.begin(),
                 [](csv::CSVField e)
                 {
-                    return e.template get<long long>();
+                    return e.template get<long>();
                 });
 
             for (int i = rawRowData.size() - 1; i > 1; --i)
@@ -138,7 +152,7 @@ std::map<std::string, std::pair<long long, long long>> co::CalculateHighestLowes
                 rawRowData[i] = abs(rawRowData[i]);
             }
 
-            std::pair<long long, long long>& rowData = data[row[1].get()];
+            std::pair<long, long>& rowData = data[row[1].get()];
             rowData.first = rowData.first ? *std::min_element(rawRowData.begin(), rawRowData.end()) : std::min(rowData.first, *std::min_element(rawRowData.begin(), rawRowData.end()));
             rowData.second = std::max(rowData.second, *std::max_element(rawRowData.begin(), rawRowData.end()));
         }
@@ -147,9 +161,9 @@ std::map<std::string, std::pair<long long, long long>> co::CalculateHighestLowes
     return data;
 }
 
-std::map<std::string, std::pair<long long, long long>> co::CalculateHighestLowestRecovered()
+std::map<std::string, std::pair<long, long>> co::CalculateHighestLowestRecovered()
 {
-    static std::map<std::string, std::pair<long long, long long>> data;
+    static std::map<std::string, std::pair<long, long>> data;
 
     if (data.empty())
     {
@@ -160,7 +174,7 @@ std::map<std::string, std::pair<long long, long long>> co::CalculateHighestLowes
 
         while (csvReader.read_row(row))
         {
-            std::vector<long long> rawRowData;
+            std::vector<long> rawRowData;
             rawRowData.resize(row.size() - 4);
             std::transform(
                 row.begin() + 4,
@@ -168,7 +182,7 @@ std::map<std::string, std::pair<long long, long long>> co::CalculateHighestLowes
                 rawRowData.begin(),
                 [](csv::CSVField e)
                 {
-                    return e.template get<long long>();
+                    return e.template get<long>();
                 });
 
             for (int i = rawRowData.size() - 1; i > 1; --i)
@@ -177,7 +191,7 @@ std::map<std::string, std::pair<long long, long long>> co::CalculateHighestLowes
                 rawRowData[i] = abs(rawRowData[i]);
             }
 
-            std::pair<long long, long long>& rowData = data[row[1].get()];
+            std::pair<long, long>& rowData = data[row[1].get()];
             rowData.first = rowData.first ? *std::min_element(rawRowData.begin(), rawRowData.end()) : std::min(rowData.first, *std::min_element(rawRowData.begin(), rawRowData.end()));
             rowData.second = std::max(rowData.second, *std::max_element(rawRowData.begin(), rawRowData.end()));
         }
@@ -186,8 +200,59 @@ std::map<std::string, std::pair<long long, long long>> co::CalculateHighestLowes
     return data;
 }
 
-template <class T>
-std::vector<std::string> co::BuildDateRanges(const std::vector<std::string>& colNames, T startDateRangeCondition, T endDateRangeCondition)
+std::map<std::string, std::vector<long>> co::CalculateConfirmedDeathRecovered()
+{
+    static std::map<std::string, std::vector<long>> data;
+
+    if (data.empty())
+    {
+        std::map<std::string, long> dataConfirmed = CalculateTotal("resources/time_series_covid19_confirmed_global.csv");
+        std::map<std::string, long> dataDeaths = CalculateTotal("resources/time_series_covid19_deaths_global.csv");
+        std::map<std::string, long> dataRecovered = CalculateTotal("resources/time_series_covid19_recovered_global.csv");
+
+        std::vector<std::string> countryNames = GetCountryNames();
+        std::for_each(
+            countryNames.begin(),
+            countryNames.end(),
+            [&](std::string& e)
+            {
+                std::vector<long> count;
+                count.push_back(dataConfirmed[e]);
+                count.push_back(dataDeaths[e]);
+                count.push_back(dataRecovered[e]);
+                data[e] = count;
+            });
+    }
+
+    return data;
+}
+
+std::vector<std::pair<std::string, long>> co::ProcessPrologResult()
+{
+    static std::vector<std::pair<std::string, long>> data;
+
+    if (data.empty())
+    {
+        std::map<std::string, long> mapConfirmed = co::CalculateTotalConfirmed();
+        std::string result = co::PrologSortCases(co::GetPrologEngine(""));
+        co::TrimLeft("[", result);
+        co::TrimRight("]", result);
+
+        csv::CSVFormat format;
+        format.delimiter(',')
+            .quote('\'');
+        auto csvResult = csv::parse(result, format);
+        for (const std::string& s : csvResult.get_col_names())
+        {
+            std::pair<std::string, long> tmp(s, mapConfirmed[s]);
+            data.push_back(tmp);
+        }
+    }
+
+    return data;
+}
+
+std::vector<std::string> co::BuildDateRanges(const std::vector<std::string>& colNames, std::function<bool(date::year_month_day)> startDateRangeCondition, std::function<bool(date::year_month_day)> endDateRangeCondition)
 {
     std::vector<std::string> dateRanges;
     std::for_each(
@@ -232,23 +297,10 @@ void co::CalculateCasesCount(csv::CSVReader& csvReader, std::vector<std::string>
 
     while (csvReader.read_row(row))
     {
-        // std::vector<int> rawRowData;
-        // std::vector<std::string> rowData;
         co::List<int> rawRowData;
         std::vector<std::string> rowData;
 
         // I have no solution for this using iterators
-        /*for (int i = 4, k = 0; i < row.size(); ++i, ++k)
-        {
-            rawRowData.push_back(row[i].template get<int>());
-            int days = getDaysInDateRange(dateRanges[k]);
-            for (int j = 0; j < days; ++j)
-            {
-                ++i;
-            }
-            rawRowData.back() -= row[i].template get<int>();
-            rawRowData.back() = abs(rawRowData.back());
-        }*/
         for (int i = 4, k = 0; i < row.size(); ++i, ++k)
         {
             rawRowData.InsertTail(row[i].template get<int>());
@@ -261,7 +313,6 @@ void co::CalculateCasesCount(csv::CSVReader& csvReader, std::vector<std::string>
             rawRowData.Tail() = abs(rawRowData.Tail());
         }
 
-        // rowData.resize(rawRowData.size()); // allocate space
         rowData.resize(rawRowData.Size()); // allocate space
         std::transform(
             rawRowData.begin(),
@@ -276,4 +327,32 @@ void co::CalculateCasesCount(csv::CSVReader& csvReader, std::vector<std::string>
 
         data.push_back(rowData);
     }
+}
+
+std::map<std::string, long> co::CalculateTotal(const std::string& filename)
+{
+    std::map<std::string, long> data;
+
+    csv::CSVReader csvReader(filename);
+
+    // do processing
+    csv::CSVRow row;
+
+    while (csvReader.read_row(row))
+    {
+        std::vector<long> rowData;
+        rowData.resize(row.size() - 4);
+        std::transform(
+            row.begin() + 4,
+            row.end(),
+            rowData.begin(),
+            [](csv::CSVField e)
+            {
+                return e.template get<long>();
+            });
+
+        data[row[1].get()] += *std::max_element(rowData.begin(), rowData.end());
+    }
+
+    return data;
 }

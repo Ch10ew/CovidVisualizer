@@ -57,6 +57,13 @@ namespace co
      * @param searchTerm Filter
      */
     void TableSearchCountry(std::string country);
+
+    /**
+     * @brief Display the total confirmed Covid-19 cases according to country, sorted by ascending order.
+     *
+     * Called by co::Update().
+     */
+    void TableSortCountry();
 } // namespace co
 
 #endif // TABLE_HPP
