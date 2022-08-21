@@ -128,34 +128,7 @@ std::map<std::string, std::pair<long, long>> co::CalculateHighestLowestDeath()
 
     if (data.empty())
     {
-        csv::CSVReader csvReader("resources/time_series_covid19_deaths_global.csv");
-
-        // do processing
-        csv::CSVRow row;
-
-        while (csvReader.read_row(row))
-        {
-            std::vector<long> rawRowData;
-            rawRowData.resize(row.size() - 4);
-            std::transform(
-                row.begin() + 4,
-                row.end(),
-                rawRowData.begin(),
-                [](csv::CSVField e)
-                {
-                    return e.template get<long>();
-                });
-
-            for (int i = rawRowData.size() - 1; i > 1; --i)
-            {
-                rawRowData[i] -= rawRowData[i - 1];
-                rawRowData[i] = abs(rawRowData[i]);
-            }
-
-            std::pair<long, long>& rowData = data[row[1].get()];
-            rowData.first = rowData.first ? *std::min_element(rawRowData.begin(), rawRowData.end()) : std::min(rowData.first, *std::min_element(rawRowData.begin(), rawRowData.end()));
-            rowData.second = std::max(rowData.second, *std::max_element(rawRowData.begin(), rawRowData.end()));
-        }
+        data = CalculateHighestLowest("resources/time_series_covid19_deaths_global.csv");
     }
 
     return data;
@@ -167,35 +140,65 @@ std::map<std::string, std::pair<long, long>> co::CalculateHighestLowestRecovered
 
     if (data.empty())
     {
-        csv::CSVReader csvReader("resources/time_series_covid19_recovered_global.csv");
+        data = CalculateHighestLowest("resources/time_series_covid19_recovered_global.csv");
+    }
 
-        // do processing
-        csv::CSVRow row;
+    return data;
+}
 
-        while (csvReader.read_row(row))
-        {
-            std::vector<long> rawRowData;
-            rawRowData.resize(row.size() - 4);
-            std::transform(
-                row.begin() + 4,
-                row.end(),
-                rawRowData.begin(),
-                [](csv::CSVField e)
-                {
-                    return e.template get<long>();
-                });
+std::map<std::string, std::pair<long, long>> co::CalculateHighestLowest(std::string filename)
+{
+    std::map<std::string, std::pair<long, long>> data;
 
-            for (int i = rawRowData.size() - 1; i > 1; --i)
+    std::map<std::string, std::vector<long>> rawData;
+
+    csv::CSVReader csvReader(filename);
+
+    // do processing
+    csv::CSVRow row;
+
+    while (csvReader.read_row(row))
+    {
+        std::vector<long> rawRowData;
+        rawRowData.resize(row.size() - 4);
+        std::transform(
+            row.begin() + 4,
+            row.end(),
+            rawRowData.begin(),
+            [](csv::CSVField e)
             {
-                rawRowData[i] -= rawRowData[i - 1];
-                rawRowData[i] = abs(rawRowData[i]);
+                return e.template get<long>();
+            });
+
+        for (int i = rawRowData.size() - 1; i > 1; --i)
+        {
+            rawRowData[i] -= rawRowData[i - 1];
+            if (rawRowData[i] < 0) // Broken data, reset to dataset minimum
+            {
+                rawRowData[i] = (i == rawRowData.size() - 1 ? 0 : *std::min_element(rawRowData.begin() + i + 1, rawRowData.end()));
             }
 
-            std::pair<long, long>& rowData = data[row[1].get()];
-            rowData.first = rowData.first ? *std::min_element(rawRowData.begin(), rawRowData.end()) : std::min(rowData.first, *std::min_element(rawRowData.begin(), rawRowData.end()));
-            rowData.second = std::max(rowData.second, *std::max_element(rawRowData.begin(), rawRowData.end()));
+            // Accumulate from previous entry if country already exists, used for countries with state listed like Australia
+            if (rawData.count(row[1].get()) > 0)
+            {
+                rawRowData[i] += rawData[row[1].get()][i];
+            }
         }
+
+        rawData[row[1].get()] = rawRowData;
     }
+
+    std::for_each(
+        rawData.begin(),
+        rawData.end(),
+        [&](const auto& kv)
+        {
+            std::pair<long, long>& rowData = data[kv.first];
+
+            // In case there are repeat countries, check for if there is a previous
+            rowData.first = rowData.first ? *std::min_element(rawData[kv.first].begin(), rawData[kv.first].end()) : std::min(rowData.first, *std::min_element(rawData[kv.first].begin(), rawData[kv.first].end()));
+            rowData.second = std::max(rowData.second, *std::max_element(rawData[kv.first].begin(), rawData[kv.first].end()));
+        });
 
     return data;
 }

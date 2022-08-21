@@ -54,7 +54,7 @@ namespace co
     /**
      * @brief Find the highest & lowest death count for each country.
      *
-     * Headers are as follows: Country, Lowest Death, Highest Death, Lowest Recovered, Highest Recovered
+     * Headers are as follows: Country, Lowest Death, Highest Death
      *
      * @return std::map<std::string, std::pair<long, long>> Data
      */
@@ -68,6 +68,16 @@ namespace co
      * @return std::map<std::string, std::pair<long, long>> Data
      */
     std::map<std::string, std::pair<long, long>> CalculateHighestLowestRecovered();
+
+    /**
+     * @brief [INTERNAL] Find the highest & lowest count for each country based on the file given.
+     *
+     * Headers are as follows: Country, Lowest, Highest
+     *
+     * @param filename File to read from
+     * @return std::map<std::string, std::pair<long, long>> Data
+     */
+    std::map<std::string, std::pair<long, long>> CalculateHighestLowest(std::string filename);
 
     /**
      * @brief Find the total confirmed, death, recovered count for each country.
