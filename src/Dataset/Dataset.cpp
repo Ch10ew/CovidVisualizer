@@ -195,9 +195,8 @@ std::map<std::string, std::pair<long, long>> co::CalculateHighestLowest(std::str
         {
             std::pair<long, long>& rowData = data[kv.first];
 
-            // In case there are repeat countries, check for if there is a previous
-            rowData.first = rowData.first ? *std::min_element(rawData[kv.first].begin(), rawData[kv.first].end()) : std::min(rowData.first, *std::min_element(rawData[kv.first].begin(), rawData[kv.first].end()));
-            rowData.second = std::max(rowData.second, *std::max_element(rawData[kv.first].begin(), rawData[kv.first].end()));
+            rowData.first = std::min(rowData.first, *std::min_element(rawData[kv.first].begin(), rawData[kv.first].end()));
+            rowData.second = *std::max_element(rawData[kv.first].begin(), rawData[kv.first].end());
         });
 
     return data;
