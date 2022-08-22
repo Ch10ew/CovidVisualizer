@@ -1,7 +1,6 @@
 #include "Dataset.hpp"
 
 #include "../Prolog/Prolog.hpp"
-#include "../Structures/List.hpp"
 #include "../Util/DateUtils.hpp"
 #include "../Util/StringUtils.hpp"
 
@@ -70,35 +69,27 @@ std::map<std::string, long> co::CalculateTotalConfirmed()
     return data;
 }
 
-std::vector<std::vector<std::string>> co::CalculateTotalByWeek()
+std::map<std::string, std::vector<std::pair<std::string, long>>> co::CalculateTotalByWeek(std::string country)
 {
-    static std::vector<std::vector<std::string>> data;
+    std::map<std::string, std::vector<std::pair<std::string, long>>> data;
 
-    if (data.empty())
-    {
-        csv::CSVReader csvReader("resources/time_series_covid19_confirmed_global.csv");
+    csv::CSVReader csvReader("resources/time_series_covid19_confirmed_global.csv");
 
-        // Get headers from index 4 to end, these are the dates
-        std::vector<std::string> colNames = csvReader.get_col_names();
+    // Get headers from index 4 to end, these are the dates
+    std::vector<std::string> colNames = csvReader.get_col_names();
 
-        // Find out the dates to group, merge into `start date - end date` format
-        std::vector<std::string> dateRanges = BuildDateRanges(colNames, DateCheckMonday, DateCheckSunday);
+    // Find out the dates to group, merge into `start date - end date` format
+    std::vector<std::string> dateRanges = BuildDateRanges(colNames, DateCheckMonday, DateCheckSunday);
 
-        // Add headers into data list
-        std::vector<std::string> dateRangesCopy = dateRanges;
-        dateRangesCopy.emplace(dateRangesCopy.begin(), "Country");
-        data.push_back(dateRangesCopy);
-
-        // Summation into lists based on ranges based on headers
-        CalculateCasesCount(csvReader, dateRanges, data);
-    }
+    // Summation into lists based on ranges based on headers
+    CalculateCasesCount(csvReader, dateRanges, data, country);
 
     return data;
 }
 
-std::vector<std::vector<std::string>> co::CalculateTotalByMonth()
+std::map<std::string, std::vector<std::pair<std::string, long>>> co::CalculateTotalByMonth()
 {
-    static std::vector<std::vector<std::string>> data;
+    static std::map<std::string, std::vector<std::pair<std::string, long>>> data;
 
     if (data.empty())
     {
@@ -109,11 +100,6 @@ std::vector<std::vector<std::string>> co::CalculateTotalByMonth()
 
         // Find out the dates to group, merge into `start date - end date` format
         std::vector<std::string> dateRanges = BuildDateRanges(colNames, DateCheckFirstDayOfMonth, DateCheckLastDayOfMonth);
-
-        // Add headers into data list
-        std::vector<std::string> dateRangesCopy = dateRanges;
-        dateRangesCopy.emplace(dateRangesCopy.begin(), "Country");
-        data.push_back(dateRangesCopy);
 
         // Summation into lists based on ranges based on headers
         CalculateCasesCount(csvReader, dateRanges, data);
@@ -293,41 +279,68 @@ std::vector<std::string> co::BuildDateRanges(const std::vector<std::string>& col
     return dateRanges;
 }
 
-void co::CalculateCasesCount(csv::CSVReader& csvReader, std::vector<std::string>& dateRanges, std::vector<std::vector<std::string>>& data)
+void co::CalculateCasesCount(csv::CSVReader& csvReader, std::vector<std::string>& dateRanges, std::map<std::string, std::vector<std::pair<std::string, long>>>& data)
 {
     csv::CSVRow row;
 
     while (csvReader.read_row(row))
     {
-        co::List<int> rawRowData;
-        std::vector<std::string> rowData;
+        std::vector<std::pair<std::string, long>> rawRowData;
 
         // I have no solution for this using iterators
         for (int i = 4, k = 0; i < row.size(); ++i, ++k)
         {
-            rawRowData.InsertTail(row[i].template get<int>());
+            rawRowData.push_back(std::pair(dateRanges[k], row[i].template get<long>()));
             int days = getDaysInDateRange(dateRanges[k]);
             for (int j = 0; j < days; ++j)
             {
                 ++i;
             }
-            rawRowData.Tail() -= row[i].template get<int>();
-            rawRowData.Tail() = abs(rawRowData.Tail());
+            (rawRowData.end() - 1)->second -= row[i].template get<long>();
+            (rawRowData.end() - 1)->second = abs((rawRowData.end() - 1)->second);
+
+            // Accumulate from previous entry if country already exists, used for countries with state listed like Australia
+            if (data.count(row[1].get()) > 0)
+            {
+                (rawRowData.end() - 1)->second += data[row[1].get()][k].second;
+            }
         }
 
-        rowData.resize(rawRowData.Size()); // allocate space
-        std::transform(
-            rawRowData.begin(),
-            rawRowData.end(),
-            rowData.begin(),
-            [](int e)
+        data[row[1].get()] = rawRowData;
+    }
+}
+
+void co::CalculateCasesCount(csv::CSVReader& csvReader, std::vector<std::string>& dateRanges, std::map<std::string, std::vector<std::pair<std::string, long>>>& data, std::string country)
+{
+    csv::CSVRow row;
+
+    while (csvReader.read_row(row))
+    {
+        if (row[1].get() == country)
+        {
+            std::vector<std::pair<std::string, long>> rawRowData;
+
+            // I have no solution for this using iterators
+            for (int i = 4, k = 0; i < row.size(); ++i, ++k)
             {
-                return std::to_string(e);
-            });
+                rawRowData.push_back(std::pair(dateRanges[k], row[i].template get<long>()));
+                int days = getDaysInDateRange(dateRanges[k]);
+                for (int j = 0; j < days; ++j)
+                {
+                    ++i;
+                }
+                (rawRowData.end() - 1)->second -= row[i].template get<long>();
+                (rawRowData.end() - 1)->second = abs((rawRowData.end() - 1)->second);
 
-        rowData.emplace(rowData.begin(), row[1].get());
+                // Accumulate from previous entry if country already exists, used for countries with state listed like Australia
+                if (data.count(row[1].get()) > 0)
+                {
+                    (rawRowData.end() - 1)->second += data[row[1].get()][k].second;
+                }
+            }
 
-        data.push_back(rowData);
+            data[row[1].get()] = rawRowData;
+        }
     }
 }
 

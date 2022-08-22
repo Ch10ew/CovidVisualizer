@@ -62,36 +62,37 @@ void co::TableSumOfConfirmedWeek(std::string country)
 {
     static const ImGuiTableFlags TABLE_FLAGS = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY;
 
-    std::vector<std::vector<std::string>> data = co::CalculateTotalByWeek();
+    std::vector<std::pair<std::string, long>> data = co::CalculateTotalByWeek(country)[country];
 
     ImGui::BeginTable("table", 2, TABLE_FLAGS);
 
-    // @TODO: Modify to display by row; headers: Week, Cases Confirmed
     ImGui::TableSetupColumn("Week");
     ImGui::TableSetupColumn("Cases Confirmed");
     ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableHeadersRow();
 
-    std::vector<std::string> rowData;
+    /*std::for_each(
+        data[country].begin(),
+        data[country].end(),
+        [](std::pair<std::string, long> pair)
+        {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text(pair.first.c_str());
+            ImGui::TableSetColumnIndex(1);
+            ImGui::Text(std::to_string(pair.second).c_str());
+        });*/
     std::for_each(
         data.begin(),
         data.end(),
-        [&](std::vector<std::string> e)
+        [](std::pair<std::string, long> pair)
         {
-            if (e[0] == country)
-            {
-                rowData = e;
-            }
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text(pair.first.c_str());
+            ImGui::TableSetColumnIndex(1);
+            ImGui::Text(std::to_string(pair.second).c_str());
         });
-
-    for (int i = 1; i < data[0].size(); ++i)
-    {
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::Text(data[0][i].c_str());
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text(rowData[i].c_str());
-    }
 
     ImGui::EndTable();
 }
@@ -100,36 +101,26 @@ void co::TableSumOfConfirmedMonth(std::string country)
 {
     static const ImGuiTableFlags TABLE_FLAGS = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY;
 
-    std::vector<std::vector<std::string>> data = co::CalculateTotalByMonth();
+    std::map<std::string, std::vector<std::pair<std::string, long>>> data = co::CalculateTotalByMonth();
 
     ImGui::BeginTable("table", 2, TABLE_FLAGS);
 
-    // @TODO: Modify to display by row; headers: Month, Cases Confirmed
     ImGui::TableSetupColumn("Month");
     ImGui::TableSetupColumn("Cases Confirmed");
     ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableHeadersRow();
 
-    std::vector<std::string> rowData;
     std::for_each(
-        data.begin(),
-        data.end(),
-        [&](std::vector<std::string> e)
+        data[country].begin(),
+        data[country].end(),
+        [](std::pair<std::string, long> pair)
         {
-            if (e[0] == country)
-            {
-                rowData = e;
-            }
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text(pair.first.c_str());
+            ImGui::TableSetColumnIndex(1);
+            ImGui::Text(std::to_string(pair.second).c_str());
         });
-
-    for (int i = 1; i < data[0].size(); ++i)
-    {
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::Text(data[0][i].c_str());
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text(rowData[i].c_str());
-    }
 
     ImGui::EndTable();
 }

@@ -36,20 +36,16 @@ namespace co
     /**
      * @brief Compute the sum of confirmed cases by week for each country.
      *
-     * Headers are as follows: Country, Week 1, Week 2, ...
-     *
-     * @return std::vector<std::vector<std::string>> First vector is headers, second vector onwards is data
+     * @return std::map<std::string, std::vector<std::pair<std::string, long>>> Map of country to data
      */
-    std::vector<std::vector<std::string>> CalculateTotalByWeek();
+    std::map<std::string, std::vector<std::pair<std::string, long>>> CalculateTotalByWeek(std::string country);
 
     /**
      * @brief Compute the sum of confirmed cases by month for each country.
      *
-     * Headers are as follows: Country, Month 1, Month 2, ...
-     *
-     * @return std::vector<std::vector<std::string>> First vector is headers, second vector onwards is data
+     * @return std::map<std::string, std::vector<std::pair<std::string, long>>> Map of country to data
      */
-    std::vector<std::vector<std::string>> CalculateTotalByMonth();
+    std::map<std::string, std::vector<std::pair<std::string, long>>> CalculateTotalByMonth();
 
     /**
      * @brief Find the highest & lowest death count for each country.
@@ -115,7 +111,19 @@ namespace co
      * @param dateRanges reference to initialized dateRange
      * @param data reference to initialized data
      */
-    void CalculateCasesCount(csv::CSVReader& csvReader, std::vector<std::string>& dateRanges, std::vector<std::vector<std::string>>& data);
+    void CalculateCasesCount(csv::CSVReader& csvReader, std::vector<std::string>& dateRanges, std::map<std::string, std::vector<std::pair<std::string, long>>>& data);
+
+    /**
+     * @brief [INTERNAL] Summation of confirmed cases count into lists based on ranges based on headers
+     *
+     * Overload for specific country
+     *
+     * @param csvReader reference to initialized csvreader instance
+     * @param dateRanges reference to initialized dateRange
+     * @param data reference to initialized data
+     * @param country country to filter
+     */
+    void CalculateCasesCount(csv::CSVReader& csvReader, std::vector<std::string>& dateRanges, std::map<std::string, std::vector<std::pair<std::string, long>>>& data, std::string country);
 
     /**
      * @brief [INTERNAL] Get
