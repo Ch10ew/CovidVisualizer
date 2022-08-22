@@ -195,7 +195,7 @@ std::map<std::string, std::pair<long, long>> co::CalculateHighestLowest(std::str
         {
             std::pair<long, long>& rowData = data[kv.first];
 
-            rowData.first = std::min(rowData.first, *std::min_element(rawData[kv.first].begin(), rawData[kv.first].end()));
+            rowData.first = *std::min_element(rawData[kv.first].begin(), rawData[kv.first].end());
             rowData.second = *std::max_element(rawData[kv.first].begin(), rawData[kv.first].end());
         });
 
